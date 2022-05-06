@@ -1,27 +1,52 @@
+import React, { useState, useEffect } from "react"
 import "../styles/globals.css"
-import { AppContextProvider } from "./components/AppContext"
-
-const initialState = {
-  totalIn: 0,
-  totalOut: 0,
-  data: [],
-}
+import { AppContextProvider } from "../components/AppContext"
+import Layout from "../components/Layout"
+import axios from "axios"
 
 function MyApp({ Component, pageProps }) {
+  const [state, setState] = useState({ userId: undefined, userName: undefined, userType: undefined })
+
   const isServer = typeof window === "undefined"
 
-  let journalData = initialState
+  let jwt = null
 
-  if(!isServer) {
-    const str_data = localStorage.getItem("data_journal")
-    journalData = str_data != null ? JSON.parse(str_data) : initialState
+  if (!isServer) {
+    const blog_session_token = localStorage.getItem("blog_session_token")
+    jwt = blog_session_token != null ? JSON.parse(blog_session_token) : undefined
   }
 
-  return (
-    <AppContextProvider journalData={journalData}>
-      <Component {...pageProps} />
-    </AppContextProvider>
-  )
+  const getData = async (jwt) => {
+    const datauser = await axios.get("http://localhost:3001/users/auto-sign-in", {
+      headers: { authentification: jwt.jwt }
+    }).then(res => {
+      setState({ userId: res.data.id, userName: res.data.displayName, userType: res.data.userType })
+    })
+
+    return datauser
+  }
+
+  useEffect(() => {
+    if (jwt != null) {
+      getData(jwt)
+    }
+  }, [])
+
+  if (Component.name == "SignIn") {
+    return (
+      <AppContextProvider {...jwt}>
+        <Component {...pageProps} />
+      </AppContextProvider>
+    )
+  } else {
+    return (
+      <AppContextProvider {...jwt}>
+        <Layout>
+          <Component {...pageProps} />
+        </Layout>
+      </AppContextProvider>
+    )
+  }
 }
 
 export default MyApp

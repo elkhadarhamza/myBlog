@@ -24,8 +24,24 @@ const usersRoute = ({ app }) => {
         displayName,
         userType
       })
-      res.send({id: user.id, email: user.email, displayName: user.displayName, userType: user.userType, active: user.is_active})
+      res.send({ id: user.id, email: user.email, displayName: user.displayName, userType: user.userType, active: user.is_active })
     }
+  })
+
+  app.get("/users/auto-sign-in", auth, async (req, res) => {
+    const {
+      session: { userId: sessionUserId }
+    } = req
+
+    const user = await UserModel.query().findById(sessionUserId)
+
+    if (!user) {
+      res.status(404).send({ error: "user not found" })
+
+      return
+    }
+
+    res.send({ id: user.id, displayName: user.displayName, userType: user.userType })
   })
 
   //get user by id
@@ -47,26 +63,25 @@ const usersRoute = ({ app }) => {
     if (!user) {
       res.status(404).send({ error: "user not found" })
 
-      
-return
+      return
     }
 
-    res.send({id: user.id, email: user.email, displayName: user.displayName, userType: user.userType, active: user.is_active})
+    res.send({ id: user.id, email: user.email, displayName: user.displayName, userType: user.userType, active: user.is_active })
   })
 
   //update user by id
   app.put("/users/:userId", auth, async (req, res) => {
     const {
-      body: { email, password, displayName , userType},
+      body: { email, password, displayName, userType },
       params: { userId },
-     session: { userId: sessionUserId }
+      session: { userId: sessionUserId }
     } = req
 
     if (Number(userId) !== sessionUserId) {
       res.status(403).send({ error: "forbidden" })
 
       return
-    } 
+    }
 
     const user = await UserModel.query()
       .findById(userId)
@@ -77,7 +92,7 @@ return
     if (!user) {
       res.status(404).send({ error: "user not found" })
     } else {
-      res.send({id: user.id, email: user.email, displayName: user.displayName, userType: user.userType, active: user.is_active})
+      res.send({ id: user.id, email: user.email, displayName: user.displayName, userType: user.userType, active: user.is_active })
     }
   })
 
@@ -92,7 +107,7 @@ return
       res.status(403).send({ error: "forbidden" })
 
       return
-    } 
+    }
 
     const user = await UserModel.query().findById(Number(uId))
 
@@ -108,7 +123,7 @@ return
       //delete user's posts from DB
       await user.$relatedQuery("posts").delete()
 
-      res.send({message : "user deleted with success"})
+      res.send({ message: "user deleted with success" })
     }
   })
 }

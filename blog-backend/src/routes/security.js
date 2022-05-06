@@ -30,7 +30,7 @@ const securityRoute = ({ app }) => {
       config.security.session.secret,
       { expiresIn: config.security.session.expiresIn }
     )
-    res.send({ jwt })
+    res.send({ jwt, id: user.id, displayName: user.displayName, userType: user.userType })
   })
 }
 export default securityRoute

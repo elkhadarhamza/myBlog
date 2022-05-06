@@ -1,0 +1,24 @@
+.grid {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    max-width: 800px;
+    margin: 3rem auto;
+  }
+  
+  .title {
+    font-family: Roboto, sans-serif;
+    font-weight: 400;
+  }
+  .paragraf {
+    font-family: Roboto, sans-serif;
+    font-weight: 300;
+  }
+  @media (max-width: 600px) {
+    .grid {
+      width: 100%;
+      flex-direction: column;
+    }
+  }
+  
