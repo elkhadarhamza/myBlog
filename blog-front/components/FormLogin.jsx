@@ -25,7 +25,7 @@ export default function FormLogin() {
     })
 
     const handleFormSubmit = useCallback(
-        async (userData) => {            
+        async (userData) => {
             axios.post("http://localhost:3001/sign-in", userData).then(res => {
                 saveSessionTokenInLocalStorage(res.data)
                 router.push("/")
@@ -33,8 +33,7 @@ export default function FormLogin() {
             setState({
                 added: true,
             })
-        },
-        [saveSessionTokenInLocalStorage]
+        }, [saveSessionTokenInLocalStorage]
     )
 
     return (

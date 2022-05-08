@@ -35,6 +35,34 @@ const postsRoute = ({ app }) => {
     res.send(post)
   })
 
+  app.get("/posts", async (req, res) => {
+    let page = Number(req.query.page)
+    let nbpost = Number(req.query.nbpost)
+
+    if (isNaN(page)) {
+      page = 0
+    }
+
+    if (isNaN(nbpost)) {
+      nbpost = 0
+    }
+
+    const posts = await PostModel.query().where("posts.is_published", true).orderBy("id", "DESC").page(page, nbpost)
+    let postsToSend = []
+    for (let i in posts.results) {
+      const post = posts.results[i]
+      const comments = await post.$relatedQuery("comments")
+      const author = await post.$relatedQuery("author")
+      const date = new Date(post.publication_date)
+      postsToSend.push({
+        id: post.id, title: post.title, content: post.content.substring(0, 250), publication_date: date.toLocaleDateString(), user_id: post.user_id,
+        author: author.displayName, nbComments: comments.length
+      })
+    }
+
+    res.send({ posts: postsToSend, total: posts.total })
+  })
+
   //recuperer post from id
   app.get("/posts/:postId", async (req, res) => {
     const {
@@ -46,13 +74,16 @@ const postsRoute = ({ app }) => {
     if (!post) {
       res.status(404).send({ error: "post not found" })
 
-      
-return
+      return
     }
 
     const comments = await post.$relatedQuery("comments")
-
-    res.send({id: post.id, title: post.title, content: post.content, is_published: post.is_published, comments: comments})
+    const author = await post.$relatedQuery("author")
+    const date = new Date(post.publication_date)
+    res.send({
+      id: post.id, title: post.title, content: post.content, publication_date: date.toLocaleDateString(), user_id: post.user_id,
+      author: author.displayName, comments: comments
+    })
   })
 
   //recuper all post comments by postid
@@ -66,8 +97,7 @@ return
     if (!post) {
       res.status(404).send({ error: "post not found" })
 
-      
-return
+      return
     }
 
     const comments = await post.$relatedQuery("comments")
@@ -78,7 +108,7 @@ return
   //update post
   app.put("/posts/:postId", auth, async (req, res) => {
     const {
-      body: { title, content, is_published},
+      body: { title, content, is_published },
       params: { postId },
       session: { userId: sessionUserId }
     } = req
@@ -92,7 +122,7 @@ return
     if (!post) {
       res.status(404).send({ error: "post not found" })
     } else {
-      res.send({id: post.id, title: post.title, content: post.content, is_published: post.is_published})
+      res.send({ id: post.id, title: post.title, content: post.content, is_published: post.is_published })
     }
   })
 
@@ -111,7 +141,7 @@ return
       await post.$query().delete()
       //and delete post comments from DB
       await post.$relatedQuery("comments").delete()
-      res.send({message : "post deleted with success"})
+      res.send({ message: "post deleted with success" })
     }
   })
 
@@ -127,7 +157,7 @@ return
       res.status(404).send({ error: "comment not found" })
     } else {
       await comment.$query().delete()
-      res.send({message : "comment deleted with success"})
+      res.send({ message: "comment deleted with success" })
     }
   })
 }

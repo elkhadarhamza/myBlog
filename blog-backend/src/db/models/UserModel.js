@@ -3,7 +3,7 @@ import CommentsModel from "./CommentsModel.js"
 import PostModel from "./PostModel.js"
 
 class UserModel extends Model {
-  static tableName = "users";
+  static tableName = "users"
 
   static get relationMappings() {
     return {
@@ -28,4 +28,4 @@ class UserModel extends Model {
     }
   }
 }
-export default UserModel;
+export default UserModel

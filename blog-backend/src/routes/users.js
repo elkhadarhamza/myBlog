@@ -1,4 +1,5 @@
 import UserModel from "../db/models/UserModel.js"
+import PostModel from "../db/models/PostModel.js"
 import auth from "../middlewares/auth.js"
 import md5 from "md5"
 
@@ -67,6 +68,39 @@ const usersRoute = ({ app }) => {
     }
 
     res.send({ id: user.id, email: user.email, displayName: user.displayName, userType: user.userType, active: user.is_active })
+  })
+
+  app.get("/users/:userId/posts", async (req, res) => {
+    const {
+      params: { userId }
+    } = req
+
+    let page = Number(req.query.page)
+    let nbpost = Number(req.query.nbpost)
+
+    if (isNaN(page)) {
+      page = 0
+    }
+
+    if (isNaN(nbpost)) {
+      nbpost = 0
+    }
+
+    const posts = await PostModel.query().alias("p").where("p.user_id", userId).orderBy("id", "DESC").page(page, nbpost)
+
+    let postsToSend = []
+    for (let i in posts.results) {
+      const post = posts.results[i]
+      const comments = await post.$relatedQuery("comments")
+      const author = await post.$relatedQuery("author")
+      const date = new Date(post.publication_date)
+      postsToSend.push({
+        id: post.id, title: post.title, content: post.content.substring(0, 250), publication_date: date.toLocaleDateString(), user_id: post.user_id,
+        author: author.displayName, nbComments: comments.length
+      })
+    }
+
+    res.send({ posts: postsToSend, total: posts.total })
   })
 
   //update user by id

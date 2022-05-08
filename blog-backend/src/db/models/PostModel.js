@@ -15,7 +15,7 @@ class PostModel extends Model {
           to: "users.id",
         },
       },
-      
+
       comments: {
         relation: Model.HasManyRelation,
         modelClass: CommentsModel,
@@ -24,7 +24,7 @@ class PostModel extends Model {
           to: "comments.post_id",
         },
       },
-      
+
     }
   }
 }

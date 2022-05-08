@@ -17,13 +17,11 @@ function MyApp({ Component, pageProps }) {
   }
 
   const getData = async (jwt) => {
-    const datauser = await axios.get("http://localhost:3001/users/auto-sign-in", {
+    await axios.get("http://localhost:3001/users/auto-sign-in", {
       headers: { authentification: jwt.jwt }
     }).then(res => {
       setState({ userId: res.data.id, userName: res.data.displayName, userType: res.data.userType })
     })
-
-    return datauser
   }
 
   useEffect(() => {
