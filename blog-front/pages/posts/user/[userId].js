@@ -1,20 +1,23 @@
 import axios from "axios"
 import React, { useState } from "react"
-import Articles from "../components/Articles"
-import { useContext } from "react"
-import AppContext from "../components/AppContext"
+import { useContext, useEffect } from "react"
+import AppContext from "../../../components/AppContext"
+import { useRouter } from "next/router"
+import Articles from "../../../components/Articles"
 import ReactPaginate from "react-paginate"
 
 export default function UserPosts() {
     const [data, setPosts] = useState([])
     const { state } = useContext(AppContext)
+    
+    const router = useRouter()
+    const { userId } = router.query
 
     const nbpost = 5
     let currentPage = 0
 
     const pagginationHandler = (page) => {
-        axios.get("http://localhost:3001/users/" + state.id + "/posts/?page=" + page.selected + "&nbpost=" + nbpost,
-        { headers: { authentification: state.jwt } }
+        axios.get("http://localhost:3001/users/" + userId + "/posts/?page=" + page.selected + "&nbpost=" + nbpost
         ).then(res => {
             currentPage = page
             setPosts(res.data)

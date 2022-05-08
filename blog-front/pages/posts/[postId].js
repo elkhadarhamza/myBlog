@@ -12,9 +12,13 @@ export default function UserPosts() {
     const { postId } = router.query
 
     const getData = async () => {
-        await axios.get("http://localhost:3001/posts/" + postId).then(res => {
-            setPost(res.data)
-        })
+        if(postId != undefined) {
+            await axios.get("http://localhost:3001/posts/" + postId).then(res => {
+                setPost(res.data)
+            })
+        } else {
+            router.push("/")
+        }
     }
 
     useEffect(() => {

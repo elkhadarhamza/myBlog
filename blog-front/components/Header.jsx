@@ -8,7 +8,7 @@ const Header = () => {
     let welcomeMessage = null
 
     if (state != null && state.displayName != undefined) {
-        welcomeMessage = "Welcome " + state.displayName
+        welcomeMessage = "Signed as [" + state.displayName + "]"
     }
 
     return (

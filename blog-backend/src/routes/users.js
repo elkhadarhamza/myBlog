@@ -70,10 +70,20 @@ const usersRoute = ({ app }) => {
     res.send({ id: user.id, email: user.email, displayName: user.displayName, userType: user.userType, active: user.is_active })
   })
 
-  app.get("/users/:userId/posts", async (req, res) => {
+  //get connected user posts
+  app.get("/users/:userId/posts", auth, async (req, res) => {
     const {
-      params: { userId }
+      params: { userId },
+      session: { userId: sessionUserId },
     } = req
+
+
+    if (Number(userId) !== sessionUserId) {
+      console.log(sessionUserId)
+      res.status(403).send({ error: "forbidden" })
+
+      return
+    }
 
     let page = Number(req.query.page)
     let nbpost = Number(req.query.nbpost)
@@ -95,7 +105,7 @@ const usersRoute = ({ app }) => {
       const author = await post.$relatedQuery("author")
       const date = new Date(post.publication_date)
       postsToSend.push({
-        id: post.id, title: post.title, content: post.content.substring(0, 250), publication_date: date.toLocaleDateString(), user_id: post.user_id,
+        id: post.id, title: post.title, content: post.content.substring(0, 250), publication_date: date.toLocaleDateString(), user_id: post.user_id, is_published: post.is_published,
         author: author.displayName, nbComments: comments.length
       })
     }

@@ -27,12 +27,27 @@ const postsRoute = ({ app }) => {
       session: { userId: sessionUserId }
     } = req
 
-    const post = await CommentsModel.query().insertAndFetch({
+    await CommentsModel.query().insertAndFetch({
       content,
       post_id: postId,
       user_id: sessionUserId
     })
-    res.send(post)
+    
+    const post = await PostModel.query().findById(postId)
+
+    if (!post) {
+      res.status(404).send({ error: "post not found" })
+
+      return
+    }
+
+    const comments = await post.$relatedQuery("comments")
+    const author = await post.$relatedQuery("author")
+    const date = new Date(post.publication_date)
+    res.send({
+      id: post.id, title: post.title, content: post.content, publication_date: date.toLocaleDateString(), user_id: post.user_id,
+      author: author.displayName, comments: comments
+    })
   })
 
   app.get("/posts", async (req, res) => {
