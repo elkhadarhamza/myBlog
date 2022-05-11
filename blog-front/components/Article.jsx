@@ -33,9 +33,9 @@ const Article = (props) => {
                 <div className="bg-white flex flex-col justify-start p-6">
                     <span className="text-3xl font-bold hover:text-gray-700 pb-4">{currentpost.title}</span>
                     <p href="#" className="text-sm pb-3">
-                        By <a href="#" className="font-semibold hover:text-gray-800">{currentpost.author}</a>, Published on {currentpost.publication_date}
+                        By <Link href={"/posts/user/" + post.user_id}><a className="font-semibold hover:text-gray-800">{currentpost.author}</a></Link>, Published on {currentpost.publication_date}
                     </p>
-                    <span className="pb-6">{currentpost.content}</span>
+                    <span className="pb-1">{currentpost.content}</span>
                 </div>
 
                 <Formik
@@ -48,22 +48,34 @@ const Article = (props) => {
                             onSubmit={handleSubmit}
                             noValidate
                         >
-                            <div className="flex flex-col m-5">
+                            <div className="flex flex-col m-1">
                                 <div className="flex flex-col items-center w-full my-4">
                                     <h1 className="text-center text-4xl font-semibold mb-5">Comments</h1>
-                                    <div className="w-full">
-                                        <FormField className="border-solid border-gray-300 border py-3 px-3 h-40 w-full rounded text-gray-700" name="content" as="textarea">
-                                            Content
-                                        </FormField>
-                                    </div>
-                                    <button className="mt-4 w-auto bg-blue-600 hover:bg-blue-500 text-green-100 border py-3 px-6 font-semibold text-md rounded" type="submit">
-                                        Add comment
-                                    </button>
+                                    {state.jwt != null && (
+                                        <>
+                                            <div className="w-full">
+                                                <FormField className="border-solid border-gray-300 border py-3 px-3 h-40 w-full rounded text-gray-700" name="content" as="textarea">
+                                                    Content
+                                                </FormField>
+                                            </div>
+                                            <button className="mt-4 w-auto bg-blue-600 hover:bg-blue-500 text-green-100 border py-3 px-6 font-semibold text-md rounded" type="submit">
+                                                Add comment
+                                            </button>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         </form>
                     )}
-                </Formik>
+                </Formik>                
+                {currentpost.comments.map((comment, index) => {
+                    return (
+                        <div className={index % 2 == 0 ? "m-2 bg-white flex flex-col justify-start p-1 bg-gray-100" : "m-2 bg-white flex flex-col justify-start p-1"} key={index}>
+                            <span className="font-bold hover:text-gray-700 pb-4">{comment.author} Commented on {comment.created_at}</span>
+                            <span className="pb-1">{comment.content}</span>
+                        </div>)
+                })
+                }
             </article>
         </>
     )

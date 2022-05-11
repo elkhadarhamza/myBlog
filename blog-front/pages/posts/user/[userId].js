@@ -9,7 +9,7 @@ import ReactPaginate from "react-paginate"
 export default function UserPosts() {
     const [data, setPosts] = useState([])
     const { state } = useContext(AppContext)
-    
+
     const router = useRouter()
     const { userId } = router.query
 
@@ -17,11 +17,20 @@ export default function UserPosts() {
     let currentPage = 0
 
     const pagginationHandler = (page) => {
-        axios.get("http://localhost:3001/users/" + userId + "/posts/?page=" + page.selected + "&nbpost=" + nbpost
-        ).then(res => {
-            currentPage = page
-            setPosts(res.data)
-        })
+        if(state.jwt != null) {
+            axios.get("http://localhost:3001/users/" + userId + "/posts/?page=" + page.selected + "&nbpost=" + nbpost,
+            { headers: { authentification:  state.jwt } }
+            ).then(res => {
+                currentPage = page
+                setPosts(res.data)
+            })
+        } else {
+            axios.get("http://localhost:3001/users/" + userId + "/published/posts/?page=" + page.selected + "&nbpost=" + nbpost
+            ).then(res => {
+                currentPage = page
+                setPosts(res.data)
+            })
+        }
     }
 
     return (

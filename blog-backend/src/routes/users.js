@@ -70,7 +70,7 @@ const usersRoute = ({ app }) => {
     res.send({ id: user.id, email: user.email, displayName: user.displayName, userType: user.userType, active: user.is_active })
   })
 
-  //get connected user posts
+  //get connected user posts (include not published posts)
   app.get("/users/:userId/posts", auth, async (req, res) => {
     const {
       params: { userId },
@@ -78,12 +78,12 @@ const usersRoute = ({ app }) => {
     } = req
 
 
-    if (Number(userId) !== sessionUserId) {
+     if (Number(userId) !== sessionUserId) {
       console.log(sessionUserId)
       res.status(403).send({ error: "forbidden" })
 
       return
-    }
+    } 
 
     let page = Number(req.query.page)
     let nbpost = Number(req.query.nbpost)
@@ -96,7 +96,47 @@ const usersRoute = ({ app }) => {
       nbpost = 0
     }
 
-    const posts = await PostModel.query().alias("p").where("p.user_id", userId).orderBy("id", "DESC").page(page, nbpost)
+    console.log(auth)
+    let posts = null
+    
+    posts = await PostModel.query().alias("p").where("p.user_id", userId).orderBy("id", "DESC").page(page, nbpost)
+
+    let postsToSend = []
+    for (let i in posts.results) {
+      const post = posts.results[i]
+      const comments = await post.$relatedQuery("comments")
+      const author = await post.$relatedQuery("author")
+      const date = new Date(post.publication_date)
+      postsToSend.push({
+        id: post.id, title: post.title, content: post.content.substring(0, 250), publication_date: date.toLocaleDateString(), user_id: post.user_id, is_published: post.is_published,
+        author: author.displayName, nbComments: comments.length
+      })
+    }
+
+    res.send({ posts: postsToSend, total: posts.total })
+  })
+
+  //get user published posts
+  app.get("/users/:userId/published/posts", async (req, res) => {
+    const {
+      params: { userId }
+    } = req
+
+    let page = Number(req.query.page)
+    let nbpost = Number(req.query.nbpost)
+
+    if (isNaN(page)) {
+      page = 0
+    }
+
+    if (isNaN(nbpost)) {
+      nbpost = 0
+    }
+
+    console.log(auth)
+    let posts = null
+    
+    posts = await PostModel.query().alias("p").where("p.user_id", userId).where("p.is_published", true).orderBy("id", "DESC").page(page, nbpost)
 
     let postsToSend = []
     for (let i in posts.results) {

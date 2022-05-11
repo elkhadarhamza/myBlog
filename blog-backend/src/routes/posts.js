@@ -33,20 +33,28 @@ const postsRoute = ({ app }) => {
       user_id: sessionUserId
     })
     
-    const post = await PostModel.query().findById(postId)
+
+    const post = await PostModel.query().findById(postId).where("posts.is_published", true)
 
     if (!post) {
-      res.status(404).send({ error: "post not found" })
+      res.status(404).send({ error: "post not found, or not published" })
 
       return
     }
 
-    const comments = await post.$relatedQuery("comments")
+    const comments = await post.$relatedQuery("comments").orderBy("id", "DESC")
+    let postComments = []
+    for (let i in comments) {
+      const comment = comments[i]
+      const commentAuthor = await comment.$relatedQuery("author")
+      const commentdate = new Date(comment.created_at)
+      postComments.push({id: comment.id, content: comment.content, created_at: commentdate.toLocaleDateString(), author: commentAuthor.displayName})
+    }
     const author = await post.$relatedQuery("author")
     const date = new Date(post.publication_date)
     res.send({
       id: post.id, title: post.title, content: post.content, publication_date: date.toLocaleDateString(), user_id: post.user_id,
-      author: author.displayName, comments: comments
+      author: author.displayName, comments: postComments
     })
   })
 
@@ -71,7 +79,7 @@ const postsRoute = ({ app }) => {
       const date = new Date(post.publication_date)
       postsToSend.push({
         id: post.id, title: post.title, content: post.content.substring(0, 250), publication_date: date.toLocaleDateString(), user_id: post.user_id,
-        author: author.displayName, nbComments: comments.length
+        author: author.displayName, nbComments: comments.length, is_published: true
       })
     }
 
@@ -84,20 +92,27 @@ const postsRoute = ({ app }) => {
       params: { postId }
     } = req
 
-    const post = await PostModel.query().findById(postId)
+    const post = await PostModel.query().findById(postId).where("posts.is_published", true)
 
     if (!post) {
-      res.status(404).send({ error: "post not found" })
+      res.status(404).send({ error: "post not found, or not published" })
 
       return
     }
 
-    const comments = await post.$relatedQuery("comments")
+    const comments = await post.$relatedQuery("comments").orderBy("id", "DESC")
+    let postComments = []
+    for (let i in comments) {
+      const comment = comments[i]
+      const commentAuthor = await comment.$relatedQuery("author")
+      const commentdate = new Date(comment.created_at)
+      postComments.push({id: comment.id, content: comment.content, created_at: commentdate.toLocaleDateString(), author: commentAuthor.displayName})
+    }
     const author = await post.$relatedQuery("author")
     const date = new Date(post.publication_date)
     res.send({
       id: post.id, title: post.title, content: post.content, publication_date: date.toLocaleDateString(), user_id: post.user_id,
-      author: author.displayName, comments: comments
+      author: author.displayName, comments: postComments
     })
   })
 

@@ -15,8 +15,7 @@ const auth = (req, res, next) => {
       console.log({ err })
       res.status(403).send({ error: "forbidden" })
 
-      
-return
+      return
     }
 
     res.status(500).send({ error: "oops, try again" })

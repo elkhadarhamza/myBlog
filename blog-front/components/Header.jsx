@@ -33,7 +33,7 @@ const Header = () => {
                         {
                             welcomeMessage != null ?
                                 <>
-                                    <Link href="/sign-out"><a className="pl-6" suppressHydrationWarning>Sign Out</a></Link>
+                                    <Link href="/sign-out"><a className="pl-6" suppressHydrationWarning>Logout</a></Link>
                                     <span className="pl-6 text-yellow-400" suppressHydrationWarning>{welcomeMessage}</span>
                                 </> :
                                 <>

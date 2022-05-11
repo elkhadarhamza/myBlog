@@ -62,7 +62,6 @@ const Inscription = () => {
                                         Add post
                                     </button>
                                 </div>
-
                             </div>
                         </div>
                     </div>
