@@ -51,7 +51,7 @@ const Article = (props) => {
                             <div className="flex flex-col m-1">
                                 <div className="flex flex-col items-center w-full my-4">
                                     <h1 className="text-center text-4xl font-semibold mb-5">Comments</h1>
-                                    {state.jwt != null && (
+                                    {state != null && state.jwt != null && (
                                         <>
                                             <div className="w-full">
                                                 <FormField className="border-solid border-gray-300 border py-3 px-3 h-40 w-full rounded text-gray-700" name="content" as="textarea">
@@ -67,7 +67,7 @@ const Article = (props) => {
                             </div>
                         </form>
                     )}
-                </Formik>                
+                </Formik>
                 {currentpost.comments.map((comment, index) => {
                     return (
                         <div className={index % 2 == 0 ? "m-2 bg-white flex flex-col justify-start p-1 bg-gray-100" : "m-2 bg-white flex flex-col justify-start p-1"} key={index}>
