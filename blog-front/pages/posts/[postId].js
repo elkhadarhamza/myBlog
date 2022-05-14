@@ -11,26 +11,25 @@ export default function UserPosts() {
     const router = useRouter()
     const { postId } = router.query
 
-    const getData = async () => {
-        if(postId != undefined) {
-            await axios.get("http://localhost:3001/posts/" + postId).then(res => {
-                setPost(res.data)
-            })
-        } else {
-            router.push("/")
-        }
-    }
-
     useEffect(() => {
-        getData()
-    }, [])
+        async function fetchData() {
+            if (postId != undefined) {
+                await axios.get("http://localhost:3001/posts/" + postId).then(res => {
+                    setPost(res.data)
+                })
+            } else {
+                router.push("/")
+            }
+        }
+        fetchData()
+      }, [postId, router]) 
 
-    if(post != undefined) {
+    if (post != undefined) {
         return (
             <>
                 <div className="container mx-auto flex flex-wrap py-6">
                     <div className="w-full md:w-3/3 flex flex-col items-center px-3">
-                        <Article post={post} />   
+                        <Article post={post} />
                     </div>
                 </div>
             </>

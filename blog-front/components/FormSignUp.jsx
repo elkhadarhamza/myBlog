@@ -1,7 +1,7 @@
 import styles from "../styles/header.module.css"
 import Image from "next/image"
 import { Formik } from "formik"
-import { useContext, useCallback, useState } from "react"
+import { useContext, useCallback } from "react"
 import AppContext from "./AppContext"
 import * as yup from "yup"
 import FormField from "./FormField"
@@ -9,30 +9,29 @@ import axios from "axios"
 import { useRouter } from "next/router"
 import Link from "next/link"
 
-
-export default function FormLogin() {
+export default function FormSignUp() {
     const router = useRouter()
     const { saveSessionTokenInLocalStorage } = useContext(AppContext)
-    const [state, setState] = useState({ added: false })
-
     const initialValues = {
         email: "",
-        password: ""
+        password: "",
+        displayName: "",
+        confirmpassword: ""
     }
 
     const validationSchema = yup.object().shape({
         email: yup.string().trim().required().label("Username"),
         password: yup.string().trim().required().label("Password"),
+        confirmpassword: yup.string().trim().required().oneOf([yup.ref("password"), null], "Passwords must match").label("Password"),
+        displayName: yup.string().trim().required().label("Display name")
     })
 
     const handleFormSubmit = useCallback(
         async (userData) => {
-            axios.post("http://localhost:3001/sign-in", userData).then(res => {
+            console.log(userData)
+            axios.post("http://localhost:3001/users", userData).then(res => {
                 saveSessionTokenInLocalStorage(res.data)
                 router.push("/")
-            })
-            setState({
-                added: true,
             })
         }, [router, saveSessionTokenInLocalStorage]
     )
@@ -59,19 +58,29 @@ export default function FormLogin() {
                                     Email
                                 </FormField>
                             </div>
+                            <div className="mb-4">
+                                <FormField name="displayName" placeholder="Enter your name...">
+                                    Display Name
+                                </FormField>
+                            </div>
                             <div className="mb-6">
                                 <FormField name="password" type="password" placeholder="Enter password...">
                                     Password
                                 </FormField>
-                                <p className="text-red text-xs italic">Please choose a password.</p>
+                            </div>
+                            <div className="mb-6">
+                                <FormField name="confirmpassword" type="password" placeholder="Enter password...">
+                                    Confirm Password
+                                </FormField>
                             </div>
                             <div className="flex items-center justify-between">
+
                                 <button type="submit" className={styles.buttonPrimary}>
-                                    Login
+                                    Sign up
                                 </button>
-                                <Link href="/sign-up">
+                                <Link href="/sign-in">
                                 <a className="inline-block align-baseline font-bold text-sm text-blue hover:text-blue-darker" href="#">
-                                    Don't have an account yet? Sign up.
+                                    Already have an account? Sign in.
                                 </a>
                                 </Link>
                             </div>

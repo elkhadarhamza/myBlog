@@ -1,6 +1,6 @@
 import axios from "axios"
 import React, { useState } from "react"
-import { useContext, useEffect } from "react"
+import { useContext } from "react"
 import AppContext from "../../../components/AppContext"
 import { useRouter } from "next/router"
 import Articles from "../../../components/Articles"
@@ -17,7 +17,7 @@ export default function UserPosts() {
     let currentPage = 0
 
     const pagginationHandler = (page) => {
-        if(state.jwt != null) {
+        if(state != null && state.jwt != null) {
             axios.get("http://localhost:3001/users/" + userId + "/posts/?page=" + page.selected + "&nbpost=" + nbpost,
             { headers: { authentification:  state.jwt } }
             ).then(res => {

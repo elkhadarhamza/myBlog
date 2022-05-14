@@ -18,8 +18,8 @@ const AddPost = () => {
     }
 
     const validationSchema = yup.object().shape({
-        title: yup.string().required().label("Post title"),
-        content: yup.string().required().label("Post content"),
+        title: yup.string().trim().required().label("Post title"),
+        content: yup.string().trim().required().label("Post content"),
         is_published: yup.boolean()
     })
 

@@ -10,8 +10,9 @@ const Articles = (props) => {
                         <div className="bg-white flex flex-col justify-start p-6">
                             <span href="#" className="text-3xl font-bold hover:text-gray-700 pb-4">{post.title}</span>
                             <p href="#" className="text-sm pb-3">
-                                By <Link href={"/posts/user/" + post.user_id}><a className="font-semibold hover:text-gray-800">{post.author}</a></Link>,
-                                <span className={post.is_published != true ? "text-red-500" : ""}>{post.is_published == true ? " Published on " + post.publication_date : " Not Published, Created on " + post.publication_date}</span>
+                                By <Link href={"/posts/user/" + post.user_id}><a className="font-semibold hover:text-gray-800 underline">{post.author}</a></Link>,
+                                <span className={post.is_published != true ? "text-red-500" : ""}>{post.is_published == true ? " Published on " + post.publication_date : " Not Published, Created on " + post.publication_date}
+                                </span><span className="text-green-600 text-xs italic">{post.nbComments > 0 ? ", " + post.nbComments + " Comments" : ""}</span>
                             </p>
                             <span href="#" className="pb-6">{post.content}...</span>
                             {

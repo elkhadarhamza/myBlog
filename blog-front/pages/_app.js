@@ -16,19 +16,17 @@ function MyApp({ Component, pageProps }) {
     jwt = blog_session_token != null ? JSON.parse(blog_session_token) : undefined
   }
 
-  const getData = async (jwt) => {
-    await axios.get("http://localhost:3001/users/auto-sign-in", {
-      headers: { authentification: jwt.jwt }
-    }).then(res => {
-      setState({ userId: res.data.id, userName: res.data.displayName, userType: res.data.userType })
-    })
-  }
-
   useEffect(() => {
     if (jwt != null) {
-      getData(jwt)
+      async () => {
+        await axios.get("http://localhost:3001/users/auto-sign-in", {
+          headers: { authentification: jwt.jwt }
+        }).then(res => {
+          setState({ userId: res.data.id, userName: res.data.displayName, userType: res.data.userType })
+        })
+      }
     }
-  }, [])
+  }, [jwt])
 
   if (Component.name == "SignIn") {
     return (

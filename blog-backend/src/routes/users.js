@@ -2,6 +2,8 @@ import UserModel from "../db/models/UserModel.js"
 import PostModel from "../db/models/PostModel.js"
 import auth from "../middlewares/auth.js"
 import md5 from "md5"
+import jsonwebtoken from "jsonwebtoken"
+import config from "../config.js"
 
 const usersRoute = ({ app }) => {
   //add user
@@ -15,7 +17,7 @@ const usersRoute = ({ app }) => {
     })
 
     if (userWithThisEmail) {
-      res.status(404).send({ error: "user already exists, please choose another email" })
+      res.status(404).send({ error: "email already exists, please choose another email" })
     } else {
       const passwordHash = md5(password)
       const userType = "reader"
@@ -25,7 +27,19 @@ const usersRoute = ({ app }) => {
         displayName,
         userType
       })
-      res.send({ id: user.id, email: user.email, displayName: user.displayName, userType: user.userType, active: user.is_active })
+      
+      const jwt = jsonwebtoken.sign(
+        { 
+          payload: { 
+            userId: user.id 
+          } 
+        },
+        config.security.session.secret,
+        { 
+          expiresIn: config.security.session.expiresIn 
+        }
+      )
+      res.send({ jwt, id: user.id, displayName: user.displayName, userType: user.userType })
     }
   })
 

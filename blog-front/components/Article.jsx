@@ -16,7 +16,7 @@ const Article = (props) => {
     }
 
     const validationSchema = yup.object().shape({
-        content: yup.string().required().label("Comment content"),
+        content: yup.string().trim().required().label("Comment content"),
     })
 
     const handleFormSubmit = useCallback(
@@ -24,7 +24,7 @@ const Article = (props) => {
             axios.post("http://localhost:3001/posts/" + currentpost.id + "/comments", comment, { headers: { authentification: state.jwt } }).then(res => {
                 setPost(res.data)
             })
-        }, []
+        }, [currentpost.id, state.jwt]
     )
 
     return (
@@ -33,7 +33,8 @@ const Article = (props) => {
                 <div className="bg-white flex flex-col justify-start p-6">
                     <span className="text-3xl font-bold hover:text-gray-700 pb-4">{currentpost.title}</span>
                     <p href="#" className="text-sm pb-3">
-                        By <Link href={"/posts/user/" + post.user_id}><a className="font-semibold hover:text-gray-800">{currentpost.author}</a></Link>, Published on {currentpost.publication_date}
+                        By <Link href={"/posts/user/" + post.user_id}><a className="font-semibold hover:text-gray-800 underline">{currentpost.author}</a>
+                        </Link>, Published on {currentpost.publication_date}<span className="text-green-600 text-xs italic">{currentpost.nbComments > 0 ? ", " + currentpost.nbComments + " Comments" : ""}</span>
                     </p>
                     <span className="pb-1">{currentpost.content}</span>
                 </div>
