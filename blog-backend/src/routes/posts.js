@@ -48,7 +48,7 @@ const postsRoute = ({ app }) => {
       const comment = comments[i]
       const commentAuthor = await comment.$relatedQuery("author")
       const commentdate = new Date(comment.created_at)
-      postComments.push({id: comment.id, content: comment.content, created_at: commentdate.toLocaleDateString(), author: commentAuthor.displayName})
+      postComments.push({id: comment.id, content: comment.content, created_at: commentdate.toLocaleDateString(), author: commentAuthor.displayName, user_id: commentAuthor.id})
     }
     const author = await post.$relatedQuery("author")
     const date = new Date(post.publication_date)
@@ -106,7 +106,7 @@ const postsRoute = ({ app }) => {
       const comment = comments[i]
       const commentAuthor = await comment.$relatedQuery("author")
       const commentdate = new Date(comment.created_at)
-      postComments.push({id: comment.id, content: comment.content, created_at: commentdate.toLocaleDateString(), author: commentAuthor.displayName})
+      postComments.push({id: comment.id, content: comment.content, created_at: commentdate.toLocaleDateString(), author: commentAuthor.displayName, user_id: commentAuthor.id})
     }
     const author = await post.$relatedQuery("author")
     const date = new Date(post.publication_date)
@@ -176,12 +176,15 @@ const postsRoute = ({ app }) => {
   })
 
   //delete comments from comment_id
-  app.delete("/comments/:commentId", async (req, res) => {
+  app.delete("/comments/:commentId", auth, async (req, res) => {
     const {
       params: { commentId: cId },
+      session: { userId: sessionUserId }
     } = req
 
-    const comment = await CommentsModel.query().findById(Number(cId))
+    console.log("delete comments : " + cId)
+
+    const comment = await CommentsModel.query().findById(Number(cId)).where("comments.user_id", sessionUserId)
 
     if (!comment) {
       res.status(404).send({ error: "comment not found" })

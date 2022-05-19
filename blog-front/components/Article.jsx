@@ -7,7 +7,7 @@ import axios from "axios"
 import AppContext from "./AppContext"
 
 const Article = (props) => {
-    const { post } = props
+    const { post, deleteEvent } = props
     const { state } = useContext(AppContext)
     const [currentpost, setPost] = useState(post)
 
@@ -22,9 +22,9 @@ const Article = (props) => {
     const handleFormSubmit = useCallback(
         async (comment) => {
             axios.post("http://localhost:3001/posts/" + currentpost.id + "/comments", comment, { headers: { authentification: state.jwt } }).then(res => {
-                setPost(res.data)
+                setPost(res.data)                
             })
-        }, [currentpost.id, state.jwt]
+        }, [currentpost.id, state?.jwt]
     )
 
     return (
@@ -69,12 +69,23 @@ const Article = (props) => {
                         </form>
                     )}
                 </Formik>
-                {currentpost.comments.map((comment, index) => {
+                {currentpost.comments?.map((comment, index) => {
                     return (
-                        <div className={index % 2 == 0 ? "m-2 bg-white flex flex-col justify-start p-1 bg-gray-100" : "m-2 bg-white flex flex-col justify-start p-1"} key={index}>
-                            <span className="font-bold hover:text-gray-700 pb-4">{comment.author} Commented on {comment.created_at}</span>
+                        <div className={index % 2 == 0 ? "m-2 flex flex-col justify-start p-1 bg-gray-100" : "m-2 bg-white flex flex-col justify-start p-1"} key={index} id={"dev_comment_" + comment.id}>
+                            <span className="font-bold hover:text-gray-700 pb-4"><Link href={"/posts/user/" + comment.user_id}><a className="underline">{comment.author}</a></Link> Commented on {comment.created_at}</span>
                             <span className="pb-1">{comment.content}</span>
-                        </div>)
+                            {state != null && state.jwt != null && state.id == comment.user_id && (
+                                <div className="self-end">
+                                    <button className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-2 rounded-full m-1">
+                                        Edit
+                                    </button>
+                                    <button className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-2 rounded-full m-1" onClick={() => deleteEvent(comment.id)}>
+                                        Delete
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    )
                 })
                 }
             </article>

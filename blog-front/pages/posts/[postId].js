@@ -12,24 +12,30 @@ export default function UserPosts() {
     const { postId } = router.query
 
     useEffect(() => {
-        async function fetchData() {
-            if (postId != undefined) {
-                await axios.get("http://localhost:3001/posts/" + postId).then(res => {
+        async function fetchData(id) {
+            if (id != undefined) {
+                await axios.get("http://localhost:3001/posts/" + id).then(res => {
                     setPost(res.data)
                 })
             } else {
                 router.push("/")
             }
         }
-        fetchData()
-      }, [postId, router]) 
+        fetchData(postId)
+    }, [postId, router])
+
+    const deleteComment = async (commentId) => {
+        await axios.delete("http://localhost:3001/comments/" + commentId, { headers: { authentification: state.jwt } }).then(res => {     
+            document.getElementById("dev_comment_" + commentId)?.remove()                     
+        })
+    }
 
     if (post != undefined) {
         return (
             <>
                 <div className="container mx-auto flex flex-wrap py-6">
                     <div className="w-full md:w-3/3 flex flex-col items-center px-3">
-                        <Article post={post} />
+                        <Article post={post} deleteEvent={deleteComment}/>
                     </div>
                 </div>
             </>
