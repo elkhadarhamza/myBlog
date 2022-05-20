@@ -10,22 +10,34 @@ const Article = (props) => {
     const { post, deleteEvent } = props
     const { state } = useContext(AppContext)
     const [currentpost, setPost] = useState(post)
-
-    const initialValues = {
-        content: ""
-    }
+    const [isEditComment, activateEditComment] = useState(false)
+    const [newComment, updateComment] = useState({id:"", content:""})
 
     const validationSchema = yup.object().shape({
         content: yup.string().trim().required().label("Comment content"),
     })
 
     const handleFormSubmit = useCallback(
-        async (comment) => {
-            axios.post("http://localhost:3001/posts/" + currentpost.id + "/comments", comment, { headers: { authentification: state.jwt } }).then(res => {
-                setPost(res.data)                
-            })
-        }, [currentpost.id, state?.jwt]
+        async (comment, {resetForm}) => {
+            if(isEditComment) {
+                axios.put("http://localhost:3001/posts/" + currentpost.id + "/comments/" + newComment.id, comment, { headers: { authentification: state.jwt } }).then(res => {
+                    setPost(res.data)
+                    resetForm({content: ""})
+                    activateEditComment(false)
+                })
+            } else {
+                axios.post("http://localhost:3001/posts/" + currentpost.id + "/comments", comment, { headers: { authentification: state.jwt } }).then(res => {
+                    setPost(res.data)
+                    resetForm({content: ""})
+                })
+            }
+        }, [currentpost.id, isEditComment, newComment.id, state.jwt]
     )
+
+    const editComment = async (commentId, cContent) => {
+        updateComment({id: commentId, content: cContent})
+        activateEditComment(true)
+    }
 
     return (
         <>
@@ -41,8 +53,9 @@ const Article = (props) => {
 
                 <Formik
                     onSubmit={handleFormSubmit}
-                    initialValues={initialValues}
+                    initialValues={{content: isEditComment? newComment.content : ""}}
                     validationSchema={validationSchema}
+                    enableReinitialize
                 >
                     {({ handleSubmit }) => (
                         <form
@@ -56,11 +69,11 @@ const Article = (props) => {
                                         <>
                                             <div className="w-full">
                                                 <FormField className="border-solid border-gray-300 border py-3 px-3 h-40 w-full rounded text-gray-700" name="content" as="textarea">
-                                                    Content
+                                                    {isEditComment? "Content for comment id :" + newComment.id : "Content"}
                                                 </FormField>
                                             </div>
                                             <button className="mt-4 w-auto bg-blue-600 hover:bg-blue-500 text-green-100 border py-3 px-6 font-semibold text-md rounded" type="submit">
-                                                Add comment
+                                                {isEditComment? "Update Comment" : "Add comment"}
                                             </button>
                                         </>
                                     )}
@@ -71,15 +84,15 @@ const Article = (props) => {
                 </Formik>
                 {currentpost.comments?.map((comment, index) => {
                     return (
-                        <div className={index % 2 == 0 ? "m-2 flex flex-col justify-start p-1 bg-gray-100" : "m-2 bg-white flex flex-col justify-start p-1"} key={index} id={"dev_comment_" + comment.id}>
+                        <div className={index % 2 == 0 ? "m-2 flex flex-col justify-start p-1 bg-gray-100" : "m-2 bg-white flex flex-col justify-start p-1"} key={"" + index + comment.id} id={"dev_comment_" + comment.id}>
                             <span className="font-bold hover:text-gray-700 pb-4"><Link href={"/posts/user/" + comment.user_id}><a className="underline">{comment.author}</a></Link> Commented on {comment.created_at}</span>
                             <span className="pb-1">{comment.content}</span>
                             {state != null && state.jwt != null && state.id == comment.user_id && (
                                 <div className="self-end">
-                                    <button className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-2 rounded-full m-1">
+                                    <button className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-2 rounded-full m-1" onClick={() => editComment(comment.id, comment.content)}>
                                         Edit
                                     </button>
-                                    <button className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-2 rounded-full m-1" onClick={() => deleteEvent(comment.id)}>
+                                    <button className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-2 rounded-full m-1" onClick={() => deleteEvent(comment.id)} disabled={isEditComment && comment.id === newComment.id}>
                                         Delete
                                     </button>
                                 </div>

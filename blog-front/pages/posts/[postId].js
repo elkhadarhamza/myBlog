@@ -25,8 +25,9 @@ export default function UserPosts() {
     }, [postId, router])
 
     const deleteComment = async (commentId) => {
-        await axios.delete("http://localhost:3001/comments/" + commentId, { headers: { authentification: state.jwt } }).then(res => {     
-            document.getElementById("dev_comment_" + commentId)?.remove()                     
+        await axios.delete("http://localhost:3001/comments/" + commentId, { headers: { authentification: state.jwt } }).then(res => {    
+            document.getElementById("dev_comment_" + commentId).style.display = "none"        
+            document.getElementById("dev_comment_" + commentId).style.display = "none"                
         })
     }
 

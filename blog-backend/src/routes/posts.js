@@ -58,6 +58,41 @@ const postsRoute = ({ app }) => {
     })
   })
 
+  //update comments
+  app.put("/posts/:postId/comments/:commentId", auth, async (req, res) => {
+    const {
+      params: { postId, commentId },
+      body: { content },
+      session: { userId: sessionUserId }
+    } = req
+
+    const numberOfAffectedRows  = await CommentsModel.query().update({content: content}).where("id", commentId ).where("user_id", sessionUserId).where("post_id", postId)
+    
+
+    const post = await PostModel.query().findById(postId).where("posts.is_published", true)
+
+    if (numberOfAffectedRows == 0 || !post) {
+      res.status(404).send({ error: "post not found, or not published" })
+
+      return
+    }
+
+    const comments = await post.$relatedQuery("comments").orderBy("id", "DESC")
+    let postComments = []
+    for (let i in comments) {
+      const comment = comments[i]
+      const commentAuthor = await comment.$relatedQuery("author")
+      const commentdate = new Date(comment.created_at)
+      postComments.push({id: comment.id, content: comment.content, created_at: commentdate.toLocaleDateString(), author: commentAuthor.displayName, user_id: commentAuthor.id})
+    }
+    const author = await post.$relatedQuery("author")
+    const date = new Date(post.publication_date)
+    res.send({
+      id: post.id, title: post.title, content: post.content, publication_date: date.toLocaleDateString(), user_id: post.user_id,
+      author: author.displayName, comments: postComments
+    })
+  })
+
   app.get("/posts", async (req, res) => {
     let page = Number(req.query.page)
     let nbpost = Number(req.query.nbpost)
