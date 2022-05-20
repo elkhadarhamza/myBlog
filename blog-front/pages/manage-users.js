@@ -16,7 +16,7 @@ export default function ManageUsers() {
             })
         }
         fetchData()
-    }, [])
+    }, [state?.jwt])
 
 
     const deleteUser = async (userId) => {

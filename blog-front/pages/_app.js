@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from "react"
+import React, { useEffect } from "react"
 import "../styles/globals.css"
 import { AppContextProvider } from "../components/AppContext"
 import Layout from "../components/Layout"
 import axios from "axios"
 
 function MyApp({ Component, pageProps }) {
-  const [state, setState] = useState({ userId: undefined, userName: undefined, userType: undefined })
-
   const isServer = typeof window === "undefined"
 
   let jwt = null
@@ -21,9 +19,7 @@ function MyApp({ Component, pageProps }) {
       async () => {
         await axios.get("http://localhost:3001/users/auto-sign-in", {
           headers: { authentification: jwt.jwt }
-        }).then(res => {
-          setState({ userId: res.data.id, userName: res.data.displayName, userType: res.data.userType })
-        })
+        }).then(() => { })
       }
     }
   }, [jwt])

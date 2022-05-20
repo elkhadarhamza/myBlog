@@ -18,7 +18,7 @@ const Header = () => {
 
     const deleteAccount = async () => {
         if (state !== null && state.id !== undefined) {
-            await axios.delete("http://localhost:3001/users/" + state.id, { headers: { authentification: state.jwt } }).then(res => {
+            await axios.delete("http://localhost:3001/users/" + state.id, { headers: { authentification: state.jwt } }).then(() => {
                 saveSessionTokenInLocalStorage(null)
                 router.reload()
             })
