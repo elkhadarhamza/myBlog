@@ -1,4 +1,3 @@
-import Link from "next/link"
 import axios from "axios"
 import React, {  useState } from "react"
 import Articles from "../components/Articles"

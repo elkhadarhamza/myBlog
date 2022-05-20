@@ -11,32 +11,37 @@ const Article = (props) => {
     const { state } = useContext(AppContext)
     const [currentpost, setPost] = useState(post)
     const [isEditComment, activateEditComment] = useState(false)
-    const [newComment, updateComment] = useState({id:"", content:""})
+    const [newComment, updateComment] = useState({ id: "", content: "" })
 
     const validationSchema = yup.object().shape({
         content: yup.string().trim().required().label("Comment content"),
     })
 
     const handleFormSubmit = useCallback(
-        async (comment, {resetForm}) => {
-            if(isEditComment) {
+        async (comment, { resetForm }) => {
+            if (isEditComment) {
                 axios.put("http://localhost:3001/posts/" + currentpost.id + "/comments/" + newComment.id, comment, { headers: { authentification: state.jwt } }).then(res => {
                     setPost(res.data)
-                    resetForm({content: ""})
+                    resetForm({ content: "" })
                     activateEditComment(false)
                 })
             } else {
                 axios.post("http://localhost:3001/posts/" + currentpost.id + "/comments", comment, { headers: { authentification: state.jwt } }).then(res => {
                     setPost(res.data)
-                    resetForm({content: ""})
+                    resetForm({ content: "" })
                 })
             }
-        }, [currentpost.id, isEditComment, newComment.id, state.jwt]
+        }, [currentpost.id, isEditComment, newComment.id, state?.jwt]
     )
 
     const editComment = async (commentId, cContent) => {
-        updateComment({id: commentId, content: cContent})
+        updateComment({ id: commentId, content: cContent })
         activateEditComment(true)
+    }
+
+    const cancelEditComment = async () => {
+        updateComment({ id: "", content: "" })
+        activateEditComment(false)
     }
 
     return (
@@ -53,7 +58,7 @@ const Article = (props) => {
 
                 <Formik
                     onSubmit={handleFormSubmit}
-                    initialValues={{content: isEditComment? newComment.content : ""}}
+                    initialValues={{ content: isEditComment ? newComment.content : "" }}
                     validationSchema={validationSchema}
                     enableReinitialize
                 >
@@ -69,12 +74,18 @@ const Article = (props) => {
                                         <>
                                             <div className="w-full">
                                                 <FormField className="border-solid border-gray-300 border py-3 px-3 h-40 w-full rounded text-gray-700" name="content" as="textarea">
-                                                    {isEditComment? "Content for comment id :" + newComment.id : "Content"}
+                                                    {isEditComment ? "Content for comment id :" + newComment.id : "Content"}
                                                 </FormField>
                                             </div>
                                             <button className="mt-4 w-auto bg-blue-600 hover:bg-blue-500 text-green-100 border py-3 px-6 font-semibold text-md rounded" type="submit">
-                                                {isEditComment? "Update Comment" : "Add comment"}
+                                                {isEditComment ? "Update Comment" : "Add comment"}
                                             </button>
+                                            {isEditComment &&
+                                                <button className="mt-4 w-auto bg-blue-600 hover:bg-blue-500 text-green-100 border py-3 px-6 font-semibold text-md rounded" onClick={() => cancelEditComment()}>
+                                                    Cancel
+                                                </button>
+                                            }
+
                                         </>
                                     )}
                                 </div>

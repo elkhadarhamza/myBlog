@@ -1,6 +1,6 @@
 import React from "react"
 import { Formik, Field } from "formik"
-import { useContext, useCallback, useState } from "react"
+import { useContext, useCallback } from "react"
 import AppContext from "../components/AppContext"
 import * as yup from "yup"
 import FormField from "../components/FormField"
@@ -25,10 +25,10 @@ const AddPost = () => {
 
     const handleFormSubmit = useCallback(
         async (userData) => {            
-            axios.post("http://localhost:3001/posts", userData, { headers: { authentification: state.jwt } }).then(res => {
+            axios.post("http://localhost:3001/posts", userData, { headers: { authentification: state.jwt } }).then(() => {
                 router.push("/")
             })
-        }, []
+        }, [router, state?.jwt]
     )
 
     return (
@@ -62,7 +62,6 @@ const AddPost = () => {
                                         Add post
                                     </button>
                                 </div>
-
                             </div>
                         </div>
                     </div>

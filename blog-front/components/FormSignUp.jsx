@@ -1,7 +1,7 @@
 import styles from "../styles/header.module.css"
 import Image from "next/image"
 import { Formik } from "formik"
-import { useContext, useCallback } from "react"
+import { useContext, useCallback, useState } from "react"
 import AppContext from "./AppContext"
 import * as yup from "yup"
 import FormField from "./FormField"
@@ -12,6 +12,7 @@ import Link from "next/link"
 export default function FormSignUp() {
     const router = useRouter()
     const { saveSessionTokenInLocalStorage } = useContext(AppContext)
+    const [error, setError] = useState("")
     const initialValues = {
         email: "",
         password: "",
@@ -27,11 +28,13 @@ export default function FormSignUp() {
     })
 
     const handleFormSubmit = useCallback(
-        async (userData) => {
-            console.log(userData)
+        async (userData) => {            
             axios.post("http://localhost:3001/users", userData).then(res => {
                 saveSessionTokenInLocalStorage(res.data)
                 router.push("/")
+            }).catch(function (error) {
+                error
+                setError("Your email address and/or password could not be validated. Please check them and try again")
             })
         }, [router, saveSessionTokenInLocalStorage]
     )
@@ -84,6 +87,7 @@ export default function FormSignUp() {
                                 </a>
                                 </Link>
                             </div>
+                            <p className="text-red text-red-500">{error}</p>
                         </div>
                     </div>
 

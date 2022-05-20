@@ -9,7 +9,7 @@ const securityRoute = ({ app }) => {
       body: { email, password },
     } = req
 
-    const user = await UserModel.query().findOne({ email })
+    const user = await UserModel.query().findOne({ email }).where("is_active", true)
 
     if (!user) {
       res.status(401).send({ error: "invalid email or password" })

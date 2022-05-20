@@ -6,6 +6,33 @@ import jsonwebtoken from "jsonwebtoken"
 import config from "../config.js"
 
 const usersRoute = ({ app }) => {
+  //get all users
+  app.get("/users", auth, async (req, res) => {
+    const {
+      session: { userId: sessionUserId }
+    } = req
+
+    const admin = await UserModel.query().findById(sessionUserId).where("userType", "supper-admin").orWhere("userType", "admin")
+
+    if (!admin) {
+      res.status(404).send({ error: "user not found" })
+
+      return
+    }
+
+    const users = await UserModel.query().where("id", "<>", admin.id).where("userType", "<>", "supper-admin").orderBy("id", "DESC")
+
+    let usersToSend = []
+    for (let i in users) {
+      const user = users[i]
+      usersToSend.push({
+        id: user.id, email: user.email, displayName: user.displayName, userType: user.userType, active: user.is_active
+      })
+    }
+
+    res.send(usersToSend)
+  })
+
   //add user
   app.post("/users", async (req, res) => {
     const {
@@ -27,16 +54,16 @@ const usersRoute = ({ app }) => {
         displayName,
         userType
       })
-      
+
       const jwt = jsonwebtoken.sign(
-        { 
-          payload: { 
-            userId: user.id 
-          } 
+        {
+          payload: {
+            userId: user.id
+          }
         },
         config.security.session.secret,
-        { 
-          expiresIn: config.security.session.expiresIn 
+        {
+          expiresIn: config.security.session.expiresIn
         }
       )
       res.send({ jwt, id: user.id, displayName: user.displayName, userType: user.userType })
@@ -48,7 +75,7 @@ const usersRoute = ({ app }) => {
       session: { userId: sessionUserId }
     } = req
 
-    const user = await UserModel.query().findById(sessionUserId)
+    const user = await UserModel.query().findById(sessionUserId).where("is_active", true)
 
     if (!user) {
       res.status(404).send({ error: "user not found" })
@@ -92,12 +119,12 @@ const usersRoute = ({ app }) => {
     } = req
 
 
-     if (Number(userId) !== sessionUserId) {
+    if (Number(userId) !== sessionUserId) {
       console.log(sessionUserId)
       res.status(403).send({ error: "forbidden" })
 
       return
-    } 
+    }
 
     let page = Number(req.query.page)
     let nbpost = Number(req.query.nbpost)
@@ -112,7 +139,7 @@ const usersRoute = ({ app }) => {
 
     console.log(auth)
     let posts = null
-    
+
     posts = await PostModel.query().alias("p").where("p.user_id", userId).orderBy("id", "DESC").page(page, nbpost)
 
     let postsToSend = []
@@ -149,7 +176,7 @@ const usersRoute = ({ app }) => {
 
     console.log(auth)
     let posts = null
-    
+
     posts = await PostModel.query().alias("p").where("p.user_id", userId).where("p.is_published", true).orderBy("id", "DESC").page(page, nbpost)
 
     let postsToSend = []
@@ -194,6 +221,68 @@ const usersRoute = ({ app }) => {
     }
   })
 
+  //manage user profil
+  app.put("/users/:userId/profil", auth, async (req, res) => {
+    const {
+      params: { userId },
+      body: { profil },
+      session: { userId: sessionUserId }
+    } = req
+
+    if (Number(userId) !== sessionUserId) {
+      const admin = await UserModel.query().findById(sessionUserId).where("userType", "supper-admin").orWhere("userType", "admin")
+
+      if (!admin) {
+        res.status(403).send({ error: "forbidden" })
+
+        return
+      }
+    }
+
+    const user = await UserModel.query()
+      .findById(userId)
+      .patch({
+        userType: profil
+      })
+
+    if (!user) {
+      res.status(404).send({ error: "user not found" })
+    } else {
+      res.send("user updated")
+    }
+  })
+
+  //manage user status
+  app.put("/users/:userId/status", auth, async (req, res) => {
+    const {
+      params: { userId, status },
+      body: { etat },
+      session: { userId: sessionUserId }
+    } = req
+
+    if (Number(userId) !== sessionUserId) {
+      const admin = await UserModel.query().findById(sessionUserId).where("userType", "supper-admin").orWhere("userType", "admin")
+
+      if (!admin) {
+        res.status(403).send({ error: "forbidden" })
+
+        return
+      }
+    }
+
+    const user = await UserModel.query()
+      .findById(userId)
+      .patch({
+        is_active: etat
+      })
+
+    if (!user) {
+      res.status(404).send({ error: "user not found" })
+    } else {
+      res.send("user updated")
+    }
+  })
+
   //delete user, post and comments
   app.delete("/users/:userId", auth, async (req, res) => {
     const {
@@ -202,9 +291,13 @@ const usersRoute = ({ app }) => {
     } = req
 
     if (Number(uId) !== sessionUserId) {
-      res.status(403).send({ error: "forbidden" })
+      const admin = await UserModel.query().findById(sessionUserId).where("userType", "supper-admin").orWhere("userType", "admin")
 
-      return
+      if (!admin) {
+        res.status(403).send({ error: "forbidden" })
+
+        return
+      }
     }
 
     const user = await UserModel.query().findById(Number(uId))
@@ -212,14 +305,14 @@ const usersRoute = ({ app }) => {
     if (!user) {
       res.status(404).send({ error: "user not found" })
     } else {
-      //delete user from DB
-      await user.$query().delete()
-
       //delete user's comments from DB
       await user.$relatedQuery("posts_comments").delete()
 
       //delete user's posts from DB
       await user.$relatedQuery("posts").delete()
+
+      //delete user from DB
+      await user.$query().delete()
 
       res.send({ message: "user deleted with success" })
     }

@@ -13,7 +13,7 @@ import Link from "next/link"
 export default function FormLogin() {
     const router = useRouter()
     const { saveSessionTokenInLocalStorage } = useContext(AppContext)
-    const [state, setState] = useState({ added: false })
+    const [error, setError] = useState("")
 
     const initialValues = {
         email: "",
@@ -29,10 +29,16 @@ export default function FormLogin() {
         async (userData) => {
             axios.post("http://localhost:3001/sign-in", userData).then(res => {
                 saveSessionTokenInLocalStorage(res.data)
-                router.push("/")
-            })
-            setState({
-                added: true,
+
+                if (res.data.userType === "supper-admin") {
+                    router.push("/manage-users")
+                }
+                else {
+                    router.push("/")
+                }
+            }).catch(function (error) {
+                error
+                setError("Your email address and/or password could not be validated. Please check them and try again")
             })
         }, [router, saveSessionTokenInLocalStorage]
     )
@@ -55,26 +61,18 @@ export default function FormLogin() {
                                 <Image src="/logo.png" alt="MyBlog" width={100} height={100} />
                             </div>
                             <div className="mb-4">
-                                <FormField name="email" placeholder="Enter your email...">
-                                    Email
-                                </FormField>
+                                <FormField name="email" placeholder="Enter your email...">Email</FormField>
                             </div>
                             <div className="mb-6">
-                                <FormField name="password" type="password" placeholder="Enter password...">
-                                    Password
-                                </FormField>
-                                <p className="text-red text-xs italic">Please choose a password.</p>
+                                <FormField name="password" type="password" placeholder="Enter password...">Password</FormField>
                             </div>
                             <div className="flex items-center justify-between">
-                                <button type="submit" className={styles.buttonPrimary}>
-                                    Login
-                                </button>
+                                <button type="submit" className={styles.buttonPrimary}>Login</button>
                                 <Link href="/sign-up">
-                                <a className="inline-block align-baseline font-bold text-sm text-blue hover:text-blue-darker" href="#">
-                                    Don't have an account yet? Sign up.
-                                </a>
+                                    <a className="inline-block align-baseline font-bold text-sm text-blue hover:text-blue-darker" href="#">Don't have an account yet? Sign up.</a>
                                 </Link>
                             </div>
+                            <p className="text-red text-red-500">{error}</p>
                         </div>
                     </div>
 
