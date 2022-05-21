@@ -255,7 +255,7 @@ const usersRoute = ({ app }) => {
   //manage user status
   app.put("/users/:userId/status", auth, async (req, res) => {
     const {
-      params: { userId, status },
+      params: { userId },
       body: { etat },
       session: { userId: sessionUserId }
     } = req

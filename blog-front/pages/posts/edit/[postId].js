@@ -13,12 +13,6 @@ const EditPost = () => {
     const [post, setPostData] = useState({})
     const { postId } = router.query
 
-    const initialValues = {
-        title: "",
-        content: "",
-        is_published: true
-    }
-
     const validationSchema = yup.object().shape({
         title: yup.string().trim().required().label("Post title"),
         content: yup.string().trim().required().label("Post content"),
@@ -44,7 +38,7 @@ const EditPost = () => {
             }
         }
         fetchData(postId)
-    }, [router, state?.id, state?.jwt])
+    }, [postId, router, state.id, state?.jwt])
 
     return (
         <Formik
