@@ -197,7 +197,7 @@ const usersRoute = ({ app }) => {
   //update user by id
   app.put("/users/:userId", auth, async (req, res) => {
     const {
-      body: { email, password, displayName, userType },
+      body: { password, displayName },
       params: { userId },
       session: { userId: sessionUserId }
     } = req
@@ -211,7 +211,7 @@ const usersRoute = ({ app }) => {
     const user = await UserModel.query()
       .findById(userId)
       .patch({
-        email: email, passwordHash: md5(password), displayName: displayName, userType: userType
+         passwordHash: md5(password), displayName: displayName
       })
 
     if (!user) {

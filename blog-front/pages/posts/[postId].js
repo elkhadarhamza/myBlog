@@ -25,9 +25,8 @@ export default function UserPosts() {
     }, [postId, router])
 
     const deleteComment = async (commentId) => {
-        await axios.delete("http://localhost:3001/comments/" + commentId, { headers: { authentification: state.jwt } }).then(() => {    
-            document.getElementById("dev_comment_" + commentId).style.display = "none"        
-            document.getElementById("dev_comment_" + commentId).style.display = "none"                
+        await axios.delete("http://localhost:3001/comments/" + commentId, { headers: { authentification: state.jwt } }).then(() => {
+            document.getElementById("dev_comment_" + commentId).style.display = "none"
         })
     }
 
@@ -36,7 +35,7 @@ export default function UserPosts() {
             <>
                 <div className="container mx-auto flex flex-wrap py-6">
                     <div className="w-full md:w-3/3 flex flex-col items-center px-3">
-                        <Article post={post} deleteEvent={deleteComment}/>
+                        <Article post={post} deleteEvent={deleteComment} />
                     </div>
                 </div>
             </>

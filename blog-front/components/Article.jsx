@@ -6,6 +6,7 @@ import * as yup from "yup"
 import axios from "axios"
 import AppContext from "./AppContext"
 
+
 const Article = (props) => {
     const { post, deleteEvent } = props
     const { state } = useContext(AppContext)
@@ -98,11 +99,13 @@ const Article = (props) => {
                         <div className={index % 2 == 0 ? "m-2 flex flex-col justify-start p-1 bg-gray-100" : "m-2 bg-white flex flex-col justify-start p-1"} key={"" + index + comment.id} id={"dev_comment_" + comment.id}>
                             <span className="font-bold hover:text-gray-700 pb-4"><Link href={"/posts/user/" + comment.user_id}><a className="underline">{comment.author}</a></Link> Commented on {comment.created_at}</span>
                             <span className="pb-1">{comment.content}</span>
-                            {state != null && state.jwt != null && state.id == comment.user_id && (
+                            {state != null && state.jwt != null && (state.id === comment.user_id || currentpost.user_id === state.id || state.userType === "admin") && (
                                 <div className="self-end">
-                                    <button className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-2 rounded-full m-1" onClick={() => editComment(comment.id, comment.content)}>
-                                        Edit
-                                    </button>
+                                    {state?.id == comment.user_id &&
+                                        <button className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-2 rounded-full m-1" onClick={() => editComment(comment.id, comment.content)}>
+                                            Edit
+                                        </button>
+                                    }
                                     <button className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-2 rounded-full m-1" onClick={() => deleteEvent(comment.id)} disabled={isEditComment && comment.id === newComment.id}>
                                         Delete
                                     </button>

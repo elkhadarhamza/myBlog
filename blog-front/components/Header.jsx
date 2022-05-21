@@ -13,7 +13,7 @@ const Header = () => {
     let welcomeMessage = null
 
     if (state != null && state.displayName != undefined) {
-        welcomeMessage = "Signed as [" + state.displayName + "] (" + state.userType + ")"
+        welcomeMessage = "Signed as [" + state.displayName + "]"
     }
 
     const deleteAccount = async () => {
@@ -46,6 +46,14 @@ const Header = () => {
                                 </>
                             }
                             {
+                                state?.id !== undefined && <>
+                                    {
+                                        (state?.userType !== "supper-admin") &&
+                                        <li><Link href="/edit-account"><a className="hover:text-gray-200 hover:underline px-4">Edit Account</a></Link></li>
+                                    }
+                                </>
+                            }
+                            {
                                 (state?.userType === "supper-admin" || state?.userType === "admin") &&
                                 <li><Link href="/manage-users"><a className="hover:text-gray-200 hover:underline px-4">Manage users</a></Link></li>
                             }
@@ -59,6 +67,7 @@ const Header = () => {
                                 <>
                                     <Link href="/sign-out"><a className="pl-6" suppressHydrationWarning>Logout</a></Link>
                                     <span className="pl-6 text-yellow-400" suppressHydrationWarning>{welcomeMessage}</span>
+                                    <span className="pl-1 text-green-300 text-xs" suppressHydrationWarning>{"(" + state?.userType + ")"}</span>
                                     {(state?.userType === "reader" || state?.userType === "autheur" || state?.userType === "admin") &&
                                         <Popup
                                             trigger={<button className="bg-red-600 text-xs hover:bg-blue-500 text-green-100 border m-1 font-semibold text-md rounded">Remove account</button>}

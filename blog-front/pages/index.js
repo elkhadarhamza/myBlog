@@ -29,7 +29,7 @@ export default function Home() {
             containerClassName={"pagination"}
             subContainerClassName={"pages pagination"}
             initialPage={currentPage}
-            pageCount={Math.ceil(data.total / nbpost)}
+            pageCount={!isNaN(data?.total / nbpost) || data?.total / nbpost === 0 ? Math.ceil(data?.total / nbpost) : 1}
             marginPagesDisplayed={2}
             pageRangeDisplayed={nbpost}
             onPageChange={pagginationHandler}
